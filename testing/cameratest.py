@@ -1,24 +1,18 @@
 import cv2
 import mediapipe as mp
-import pandas as pd
-from datetime import datetime
-import math
+import pyautogui
 
 # Initialize MediaPipe Pose
-mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 # Open webcam
 cap = cv2.VideoCapture(0)
 
-# Variables for movement tracking
-motion_list = [0, 0]
-motion_times = []
-
 prev_center = None
-movement_threshold = 20  # Pixels, adjust sensitivity
-
-df = pd.DataFrame(columns=["Start", "End"])
+jump_threshold = 40       # Pixels upward to detect jump
+x_threshold = 30          # Pixels left/right to detect movement
+cooldown_frames = 5       # Prevent multiple triggers for one movement
+frame_counter = 0
 
 with mp_pose.Pose(
     static_image_mode=False,
@@ -37,56 +31,96 @@ with mp_pose.Pose(
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         results = pose.process(rgb_frame)
 
-        motion = 0
+        frame_counter += 1
+        trigger_jump = trigger_left = trigger_right = False
+
+        # Default values
+        delta_x = 0
+        delta_y = 0
+        center_x = 0
+        center_y = 0
 
         if results.pose_landmarks:
             landmarks = results.pose_landmarks.landmark
-            # Use midpoint of left and right hip as body center
             left_hip = landmarks[mp_pose.PoseLandmark.LEFT_HIP.value]
             right_hip = landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value]
 
-            center_x = int((left_hip.x + right_hip.x) / 2 * frame.shape[1])
-            center_y = int((left_hip.y + right_hip.y) / 2 * frame.shape[0])
+            left_x = int(left_hip.x * frame.shape[1])
+            left_y = int(left_hip.y * frame.shape[0])
+            right_x = int(right_hip.x * frame.shape[1])
+            right_y = int(right_hip.y * frame.shape[0])
+
+            # Draw hip line only
+            cv2.line(frame, (left_x, left_y), (right_x, right_y), (0,255,0), 4)
+
+            # Center point
+            center_x = (left_x + right_x) // 2
+            center_y = (left_y + right_y) // 2
 
             if prev_center:
-                dist = math.hypot(center_x - prev_center[0], center_y - prev_center[1])
-                if dist > movement_threshold:
-                    motion = 1
+                delta_y = prev_center[1] - center_y  # positive if moving up
+                delta_x = center_x - prev_center[0]  # positive if moving right
+
+                # Only trigger actions if cooldown passed
+                if frame_counter > cooldown_frames:
+                    # Jump detection
+                    if delta_y > jump_threshold:
+                        pyautogui.press('space')
+                        trigger_jump = True
+
+                    # Left/Right movement detection
+                    if delta_x > x_threshold:
+                        pyautogui.keyDown('d')
+                        trigger_right = True
+                        pyautogui.keyUp('a')
+                    elif delta_x < -x_threshold:
+                        pyautogui.keyDown('a')
+                        trigger_left = True
+                        pyautogui.keyUp('d')
+                    else:
+                        pyautogui.keyUp('a')
+                        pyautogui.keyUp('d')
+
+                    frame_counter = 0  # reset cooldown
 
             prev_center = (center_x, center_y)
 
-            # Draw skeleton
-            mp_drawing.draw_landmarks(
-                frame,
-                results.pose_landmarks,
-                mp_pose.POSE_CONNECTIONS,
-                mp_drawing.DrawingSpec(color=(0,255,0), thickness=2, circle_radius=3),
-                mp_drawing.DrawingSpec(color=(0,0,255), thickness=2, circle_radius=2)
-            )
+            # Display movement feedback
+            if trigger_jump:
+                cv2.putText(frame, "JUMP!", (10,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+            if trigger_left:
+                cv2.putText(frame, "LEFT!", (10,90), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
+            if trigger_right:
+                cv2.putText(frame, "RIGHT!", (10,130), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 3)
 
-        # Update motion list
-        motion_list.append(motion)
-        motion_list = motion_list[-2:]
+        # Always show debug info
+        cv2.putText(frame, f"Hip Center: ({center_x},{center_y})", (10,30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
+        cv2.putText(frame, f"Delta X: {delta_x}  Delta Y: {delta_y}", (10,160),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,255,0), 2)
 
-        # Log start time
-        if motion_list[-1] == 1 and motion_list[-2] == 0:
-            motion_times.append(datetime.now())
+        cv2.imshow("Game Controller", frame)
 
-        # Log end time
-        if motion_list[-1] == 0 and motion_list[-2] == 1:
-            motion_times.append(datetime.now())
-
-        cv2.imshow("Body Movement Tracker", frame)
+        # Quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            if motion == 1:
-                motion_times.append(datetime.now())
+            pyautogui.keyUp('a')
+            pyautogui.keyUp('d')
             break
-
-# Save movement times to CSV
-for i in range(0, len(motion_times), 2):
-    df = df.append({"Start": motion_times[i], "End": motion_times[i+1]}, ignore_index=True)
-
-df.to_csv("Body_Movement_Times.csv", index=False)
 
 cap.release()
 cv2.destroyAllWindows()
+
+
+
+# Get data
+import json
+
+data = {
+    "center_x": center_x,
+    "center_y": center_y,
+    "delta_x": delta_x,
+    "delta_y": delta_y
+}
+
+with open("movement_data.json", "w") as f:
+    json.dump(data, f)
