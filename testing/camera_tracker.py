@@ -4,21 +4,22 @@ import math
 from multiprocessing import Process, Value
 import pyautogui
 import time
+from collections import deque
 
 # Shared values for movement
 delta_x = Value('d', 0.0)
 delta_y = Value('d', 0.0)
 
 # Thresholds
-jump_threshold = 40
-x_threshold = 15
+jump_threshold = 6
+x_threshold = 8
+jump_cooldown = 1.5  # seconds
 
 def camera_process(delta_x, delta_y):
     mp_pose = mp.solutions.pose
     cap = cv2.VideoCapture(0)
     prev_center = None
     smooth_window = 5
-    from collections import deque
     x_history = deque(maxlen=smooth_window)
     y_history = deque(maxlen=smooth_window)
 
@@ -74,13 +75,17 @@ def camera_process(delta_x, delta_y):
     cv2.destroyAllWindows()
 
 def game_process(delta_x, delta_y):
+    last_jump_time = 0  # For cooldown tracking
+
     while True:
         dx = delta_x.value
         dy = delta_y.value
+        current_time = time.time()
 
-        # Jump
-        if dy > jump_threshold:
+        # Jump with cooldown
+        if dy > jump_threshold and (current_time - last_jump_time) > jump_cooldown:
             pyautogui.press('space')
+            last_jump_time = current_time
 
         # Left/right movement
         if dx > x_threshold:
@@ -102,16 +107,3 @@ if __name__ == "__main__":
     p2.start()
     p1.join()
     p2.join()
-
-
-import keyboard
-
-print("Press space to see a message. Press ESC to exit.")
-
-while True:
-    if keyboard.is_pressed('space'):
-        print("Spacebar was pressed!")
-        # Wait until space is released to avoid multiple prints
-        keyboard.wait('space', suppress=False)
-    if keyboard.is_pressed('esc'):
-        break
