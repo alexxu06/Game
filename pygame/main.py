@@ -123,7 +123,6 @@ def run():
                     player.rect.bottom = plat.rect.top
                     jumpSpeed = 0
                     onPlat = True
-                    player.changeSprite("pygame/idle.png")
                     break
         if player.rect.y >= groundHeight:
             player.rect.y = groundHeight
@@ -158,9 +157,12 @@ def run():
                 plat.rect.x = random.randint(100, 400)
                 plat.rect.y = lowestY + random.randint(minSpacing, maxSpacing)
                 lowestY = plat.rect.y
-    
+
+
         pygame.display.update()
         clock.tick(60)
+        if not isJumping:
+            player.changeSprite("pygame/idle.png")
         
     endGame()
 
