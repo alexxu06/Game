@@ -72,16 +72,13 @@ def endGame():
     pygame.quit()
     sys.exit()
     
-def hasCollided(player, platforms):
-    standingOn = True
+def hasCollided(player, platforms, jumpspeed):
     for plat in platforms:
-        if player.rect.bottom <= plat.rect.top + 10 and \
-           player.rect.bottom >= plat.rect.top - 10 and \
-           player.rect.right > plat.rect.left and player.rect.left < plat.rect.right:
-               standingOn = plat
-               player.rect.bottom = plat.rect.top
-               break
-    return standingOn
+        if player.rect.colliderect(plat.rect) and jumpspeed > 0:
+            player.rect.bottom = plat.rect.top
+            return True
+    
+    return False
     
 while isRunning:
     screen.fill(bgColor)
@@ -101,21 +98,6 @@ while isRunning:
                 isJumping = True
                 jumpSpeed = -20
     
-    standingOn = hasCollided(player, platforms)
-    
-    if standingOn is None and player.rect.bottom < groundHeight:
-        player.rect.y += jumpSpeed
-        jumpSpeed+= gravity
-        isJumping = True
-    else:
-        isJumping = False
-        jumpSpeed = 0
-        
-    if player.rect.bottom >= groundHeight:
-        player.rect.bottom = groundHeight
-        isJumping = False
-        jumpSpeed = 0
-    
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
         if player.rect.x > 0:
@@ -124,15 +106,24 @@ while isRunning:
         if player.rect.x < 700:
             player.rect.x+=playerSpeed
     
-    if isJumping:
-        player.rect.y += jumpSpeed
-        jumpSpeed += gravity
+  
+    player.rect.y += jumpSpeed
+    jumpSpeed += gravity
     
-        
-        if player.rect.y >= groundHeight:
-            player.rect.y = groundHeight
-            isJumping = False
+    onPlat = False
     
+    for plat in platforms:
+        if player.rect.colliderect(plat.rect) and jumpSpeed >= 0:
+            player.rect.bottom = plat.rect.top
+            jumpSpeed = 0
+            onPlat = True
+            break
+    if player.rect.y >= groundHeight:
+        player.rect.y = groundHeight
+        jumpSpeed = 0
+        onPlat = True
+    
+    isJumping = not onPlat
   
             
     pygame.display.update()
