@@ -28,7 +28,6 @@ def run():
             self.image = pygame.image.load(imgPath)
             self.image = pygame.transform.scale(self.image,(self.width, self.height))
         
-        
     isRunning = True
     isJumping = False
     jumpSpeed = 0
@@ -44,11 +43,6 @@ def run():
     platformY = []
     numPlatforms = 4
 
-    bgImgs = [pygame.transform.scale((pygame.image.load("bg1.png")), (800, 800)),
-        pygame.transform.scale((pygame.image.load("bg2.png")), (800, 800)),
-        pygame.transform.scale((pygame.image.load("bg3.png")),(800, 800)),
-        pygame.transform.scale((pygame.image.load("bg4.png")), (800, 800))
-    ]
 
     for i in range(numPlatforms):
         platformX.append(random.randint(100, 400))
@@ -76,10 +70,9 @@ def run():
 
     thresholdUp = 300
     thresholdDown = 500
-    totalScroll = 0
-    currentBg = bgImgs[0]
+    scrollSpeed = 10
     while isRunning:
-        screen.blit(currentBg, (0, 0))
+        screen.fill(bgColor)
         player.draw(screen)
         
         for i in range(numPlatforms):
@@ -154,14 +147,7 @@ def run():
                 scrollAmount = thresholdDown - player.rect.y
                 player.rect.y = thresholdDown
             
-        totalScroll += scrollAmount
-        if totalScroll >= 500 and totalScroll < 1000:
-            currentBg = bgImgs[1]
-        elif totalScroll >=1000 and totalScroll < 1500:
-            currentBg = bgImgs[2]
-        elif totalScroll >=1500:
-            currentBg = bgImgs[3]
-            
+        
         for plat in platforms:
             plat.rect.y += scrollAmount
             
