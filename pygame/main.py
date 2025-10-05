@@ -107,11 +107,12 @@ while isRunning:
     onPlat = False
     
     for plat in platforms:
-        if player.rect.colliderect(plat.rect) and jumpSpeed >= 0:
-            player.rect.bottom = plat.rect.top
-            jumpSpeed = 0
-            onPlat = True
-            break
+        if jumpSpeed >= 0:
+            if player.rect.bottom <= plat.rect.top + jumpSpeed and player.rect.colliderect(plat.rect):
+                player.rect.bottom = plat.rect.top
+                jumpSpeed = 0
+                onPlat = True
+                break
     if player.rect.y >= groundHeight:
         player.rect.y = groundHeight
         jumpSpeed = 0
