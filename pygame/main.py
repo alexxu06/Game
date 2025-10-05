@@ -83,11 +83,13 @@ def run():
                 endGame()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and not isJumping:
+                    onPlat = False
                     isJumping = True
                     jumpSpeed = -20
+                    player.changeSprite("pygame/jump.png")
 
 
-        # keys = pygame.key.get_pressed()
+        keys = pygame.key.get_pressed()
         # if keys[pygame.K_LEFT]:
         #     if player.rect.x > 0:
         #         player.rect.x-=playerSpeed
@@ -96,8 +98,9 @@ def run():
         #         player.rect.x+=playerSpeed
     # Camera-based left/right
         # Camera-based jump
-        player.changeSprite("pygame/idle.png")
+        # player.changeSprite("pygame/idle.png")
         if delta_y.value > jump_threshold and not isJumping:
+            onPlat = False
             isJumping = True
             jumpSpeed = -20
             player.changeSprite("pygame/jump.png")
@@ -115,7 +118,7 @@ def run():
         player.rect.y += jumpSpeed
         jumpSpeed += gravity
         
-        onPlat = False
+        # onPlat = False
         
         for plat in platforms:
             if jumpSpeed >= 0:
@@ -123,11 +126,13 @@ def run():
                     player.rect.bottom = plat.rect.top
                     jumpSpeed = 0
                     onPlat = True
+                    player.changeSprite("pygame/idle.png")
                     break
         if player.rect.y >= groundHeight:
             player.rect.y = groundHeight
             jumpSpeed = 0
             onPlat = True
+            player.changeSprite("pygame/idle.png")
         
         isJumping = not onPlat
         minSpacing = 100
@@ -161,10 +166,6 @@ def run():
 
         pygame.display.update()
         clock.tick(60)
-        if onPlat:
-            player.changeSprite("pygame/idle.png")
-        else:
-              player.changeSprite("pygame/jump.png")
         
     endGame()
 
