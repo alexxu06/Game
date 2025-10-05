@@ -61,4 +61,4 @@ Make sure your webcam is connected and accessible.
 * Have fun!
 
 ## Made for StormHacks2025
-## By Alex, Anthony, Markus, Xavier
+## By Alex Xu, Anthony Yiu, Markus Chu, Xavier Sandilands
