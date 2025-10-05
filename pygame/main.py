@@ -48,7 +48,7 @@ for i in range(numPlatforms):
     platformY.append(random.randint(100, 700))
     
     if i > 0:
-        while abs(platformX[i] - platformX[i-1]) <= 100 or abs(platformY[i] - platformY[i-1]) <= 100:
+        while abs(platformX[i] - platformX[i-1]) <= 125 or abs(platformY[i] - platformY[i-1]) <= 125:
             platformX[i] = random.randint(200, 750)
             platformY[i] = random.randint(100, 700)
 
@@ -79,7 +79,9 @@ def hasCollided(player, platforms, jumpspeed):
             return True
     
     return False
-    
+
+threshold = 300
+scrollSpeed = 10
 while isRunning:
     screen.fill(bgColor)
     player.draw(screen)
@@ -120,6 +122,25 @@ while isRunning:
         onPlat = True
     
     isJumping = not onPlat
+    Xmax = 400
+    Xmin = 100
+    
+    if player.rect.y < threshold:
+        scrollAmount =  threshold - player.rect.y
+        player.rect.y = threshold
+        for plat in platforms:
+            plat.rect.y += scrollAmount
+    
+        for i, plat in enumerate(platforms):
+            if plat.rect.y > 800:
+                platformX.append(random.randint(Xmin, Xmax))
+                Xmax+=100
+                Xmin+=100
+                plat.rect.y = random.randint(-50, 0)
+                if i > 0:
+                    while abs(platformX[i] - platformX[i-1]) <= 125 or abs(platformY[i] - platformY[i-1]) <= 125:
+                        platformX[i] = random.randint(Xmin, Xmax)
+                        platformY[i] = random.randint(-50, 0)
   
     pygame.display.update()
     clock.tick(60)
