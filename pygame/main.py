@@ -131,7 +131,7 @@ def run():
         isJumping = not onPlat
         minSpacing = 100
         maxSpacing = 200
-        
+        scrollAmount = 0
         
         if player.rect.y < thresholdUp:
             scrollAmount =  thresholdUp - player.rect.y
