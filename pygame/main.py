@@ -161,7 +161,7 @@ def run():
 
         pygame.display.update()
         clock.tick(60)
-        if not isJumping:
+        if onPlat:
             player.changeSprite("pygame/idle.png")
         else:
               player.changeSprite("pygame/jump.png")
