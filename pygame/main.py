@@ -16,7 +16,7 @@ class gameObj:
         self.height = height
         
         self.image = pygame.image.load(imgPath)
-        self.image = pygame.transform.scale(width, height)
+        self.image = pygame.transform.scale(self.image, (width, height))
         
         self.rect = pygame.Rect(self.x, self.y, self.width, self.height)
         
@@ -31,7 +31,7 @@ gravity = 0.6
 groundHeight = 700
 bgColor = (97, 86, 180)
 
-player = gameObj(400, 50, 100, 100, "pygame/guy.jpg")
+player = gameObj(400, 700, 100, 100, "pygame/guy.jpg")
 
 platforms = []
 platformX = []
@@ -72,23 +72,25 @@ def endGame():
     pygame.quit()
     sys.exit()
     
-def hasCollided(platformX, platformY, playerX, playerY):
-    dist = math.sqrt(math.pow(platformX - playerX,2)+(math.pow(platformY - playerY, 2)))
-    
-    if dist < 30:
-        return True
-    else:
-        False
-    
+def hasCollided(player, platforms):
+    standingOn = True
+    for plat in platforms:
+        if player.rect.bottom <= plat.rect.top + 10 and \
+           player.rect.bottom >= plat.rect.top - 10 and \
+           player.rect.right > plat.rect.left and player.rect.left < plat.rect.right:
+               standingOn = plat
+               player.rect.bottom = plat.rect.top
+               break
+    return standingOn
     
 while isRunning:
     screen.fill(bgColor)
-    player.draw()
+    player.draw(screen)
     
     for i in range(numPlatforms):
-        platforms[i].draw()
-        if hasCollided(platforms[i].x, platformX[i].y, player.rect.x, player.rect.x):
-            print("HIT")
+        platforms[i].draw(screen)
+        #if hasCollided(player, platforms, jumpSpeed):
+            #print("HIT")
         
         
     for event in pygame.event.get():
@@ -98,6 +100,21 @@ while isRunning:
             if event.key == pygame.K_SPACE and not isJumping:
                 isJumping = True
                 jumpSpeed = -20
+    
+    standingOn = hasCollided(player, platforms)
+    
+    if standingOn is None and player.rect.bottom < groundHeight:
+        player.rect.y += jumpSpeed
+        jumpSpeed+= gravity
+        isJumping = True
+    else:
+        isJumping = False
+        jumpSpeed = 0
+        
+    if player.rect.bottom >= groundHeight:
+        player.rect.bottom = groundHeight
+        isJumping = False
+        jumpSpeed = 0
     
     keys = pygame.key.get_pressed()
     if keys[pygame.K_LEFT]:
@@ -110,6 +127,7 @@ while isRunning:
     if isJumping:
         player.rect.y += jumpSpeed
         jumpSpeed += gravity
+    
         
         if player.rect.y >= groundHeight:
             player.rect.y = groundHeight
