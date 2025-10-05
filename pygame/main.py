@@ -23,6 +23,10 @@ def run():
             
         def draw(self, surface):
             surface.blit(self.image, (self.rect.x, self.rect.y))
+            
+        def changeSprite(self, imgPath):
+            self.image = pygame.image.load(imgPath)
+            self.image = pygame.transform.scale(self.image(width, height))
         
     isRunning = True
     isJumping = False
@@ -56,12 +60,6 @@ def run():
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption("jumping game")
     clock = pygame.time.Clock()
-
-    def setPlayer(x, y):
-        screen.blit(player,(x, y))
-
-    def setPlatforms(x, y, i):
-        screen.blit(platforms[i], (x, y))
         
     def endGame():
         global isRunning
@@ -69,15 +67,9 @@ def run():
         pygame.quit()
         sys.exit()
         
-    def hasCollided(player, platforms, jumpspeed):
-        for plat in platforms:
-            if player.rect.colliderect(plat.rect) and jumpspeed > 0:
-                player.rect.bottom = plat.rect.top
-                return True
-        
-        return False
 
-    threshold = 300
+    thresholdUp = 300
+    thresholdDown = 500
     scrollSpeed = 10
     while isRunning:
         screen.fill(bgColor)
@@ -107,14 +99,17 @@ def run():
         if delta_y.value > jump_threshold and not isJumping:
             isJumping = True
             jumpSpeed = -20
+            player.changeSprite("pygame/jump.png")
 
         # Camera-based left/right
         if delta_x.value > 8:
             if player.rect.x < 700:
                 player.rect.x += playerSpeed
+                player.changeSprite("pygame/right.png")
         elif delta_x.value < -8:
             if player.rect.x > 0:
                 player.rect.x -= playerSpeed
+                player.changeSprite("pygame/left.png")
         
         player.rect.y += jumpSpeed
         jumpSpeed += gravity
@@ -136,17 +131,30 @@ def run():
         isJumping = not onPlat
         minSpacing = 100
         maxSpacing = 200
-        if player.rect.y < threshold:
-            scrollAmount =  threshold - player.rect.y
-            player.rect.y = threshold
-            for plat in platforms:
-                plat.rect.y += scrollAmount
-            highestY = min(p.rect.y for p in platforms)
-            for plat in platforms:
-                if plat.rect.y > 800:
-                    platformX.append(random.randint(100, 400))
-                    plat.rect.y = highestY -random.randint(minSpacing, maxSpacing)
-                    highestY = plat.rect.y
+        
+        
+        if player.rect.y < thresholdUp:
+            scrollAmount =  thresholdUp - player.rect.y
+            player.rect.y = thresholdUp
+        elif player.rect.y > thresholdDown:
+            scrollAmount = thresholdDown - player.rect.y
+            player.rect.y = thresholdDown
+            
+        
+        for plat in platforms:
+            plat.rect.y += scrollAmount
+            
+        highestY = min(p.rect.y for p in platforms)
+        lowestY = max(p.rect.y for p in platforms)
+        for plat in platforms:
+            if plat.rect.y > 800:
+                plat.rect.x = random.randint(100, 400)
+                plat.rect.y = highestY -random.randint(minSpacing, maxSpacing)
+                highestY = plat.rect.y
+            elif plat.rect.y < -100:
+                plat.rect.x = random.randint(100, 400)
+                plat.rect.y = lowestY + random.randint(minSpacing, maxSpacing)
+                lowestY = plat.rect.y
     
         pygame.display.update()
         clock.tick(60)
