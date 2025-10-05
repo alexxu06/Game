@@ -97,7 +97,7 @@ def run():
 
         # Camera-based jump
         if delta_y.value > jump_threshold and not isJumping:
-            jumpSpeed = -20
+            jumpSpeed = -1 *  min(delta_y.value*0.7, 35)
             isJumping = True
             player.changeSprite("pygame/jump.png", yOffset=0)
 
