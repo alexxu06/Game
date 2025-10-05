@@ -36,7 +36,7 @@ def run():
     groundHeight = 700
     bgColor = (97, 86, 180)
 
-    player = gameObj(400, 750, 100, 100, "pygame/idle.png")
+    player = gameObj(400, 800, 100, 100, "pygame/idle.png")
 
     platforms = []
     platformX = []
