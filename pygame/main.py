@@ -132,13 +132,13 @@ def run():
         minSpacing = 100
         maxSpacing = 200
         scrollAmount = 0
-        
-        if player.rect.y < thresholdUp:
-            scrollAmount =  thresholdUp - player.rect.y
-            player.rect.y = thresholdUp
-        elif player.rect.y > thresholdDown:
-            scrollAmount = thresholdDown - player.rect.y
-            player.rect.y = thresholdDown
+        if not onPlat:
+            if player.rect.y < thresholdUp:
+                scrollAmount =  thresholdUp - player.rect.y
+                player.rect.y = thresholdUp
+            elif player.rect.y > thresholdDown:
+                scrollAmount = thresholdDown - player.rect.y
+                player.rect.y = thresholdDown
             
         
         for plat in platforms:
