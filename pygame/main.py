@@ -163,6 +163,8 @@ def run():
         clock.tick(60)
         if not isJumping:
             player.changeSprite("pygame/idle.png")
+        else:
+              player.changeSprite("pygame/jump.png")
         
     endGame()
 
