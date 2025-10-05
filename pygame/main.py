@@ -60,7 +60,10 @@ def run():
     screen = pygame.display.set_mode((800, 800))
     pygame.display.set_caption("Raccoon Jumper")
     clock = pygame.time.Clock()
-    bgColor = (97, 86, 180)
+
+    # Load background
+    background = pygame.image.load("pygame/background.png")
+    background = pygame.transform.scale(background, (800, 800))
 
     isRunning = True
     isJumping = False
@@ -73,7 +76,10 @@ def run():
         sys.exit()
 
     while isRunning:
-        screen.fill(bgColor)
+        # Draw background first
+        screen.blit(background, (0, 0))
+
+        # Draw player and platforms
         player.draw(screen)
         for plat in platforms:
             plat.draw(screen)
@@ -165,10 +171,9 @@ def run():
 
 if __name__ == "__main__":
     pygame.init()
-    # Start camera processes AFTER initializidng pygame
+    # Start camera processes AFTER initializing pygame
     p1 = Process(target=camera_process, args=(delta_x, delta_y), daemon=True)
     p2 = Process(target=game_process, args=(delta_x, delta_y), daemon=True)
-    p1.start()
+    p1.start()aaa
     p2.start()
     run()
-    # Processes will terminate automatically with daemon=True
