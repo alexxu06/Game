@@ -26,7 +26,7 @@ def run():
             
         def changeSprite(self, imgPath):
             self.image = pygame.image.load(imgPath)
-            self.image = pygame.transform.scale(self.image(width, height))
+            self.image = pygame.transform.scale(self.image,(self.width, self.height))
         
     isRunning = True
     isJumping = False
@@ -132,6 +132,7 @@ def run():
         minSpacing = 100
         maxSpacing = 200
         scrollAmount = 0
+        
         if not onPlat:
             if player.rect.y < thresholdUp:
                 scrollAmount =  thresholdUp - player.rect.y
