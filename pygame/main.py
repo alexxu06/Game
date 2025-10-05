@@ -62,7 +62,7 @@ def run():
     clock = pygame.time.Clock()
 
     # Load background
-    background = pygame.image.load("pygame/background.png")
+    background = pygame.image.load("pygame/image.png")
     background = pygame.transform.scale(background, (800, 800))
 
     isRunning = True
