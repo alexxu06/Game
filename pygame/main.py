@@ -36,7 +36,7 @@ player = gameObj(400, 750, 100, 100, "pygame/idle.png")
 platforms = []
 platformX = []
 platformY = []
-numPlatforms = 5
+numPlatforms = 4
 
 
 for i in range(numPlatforms):
@@ -118,8 +118,8 @@ while isRunning:
         onPlat = True
     
     isJumping = not onPlat
-    min_spacing = 100
-    max_spacing = 200
+    minSpacing = 100
+    maxSpacing = 200
     if player.rect.y < threshold:
         scrollAmount =  threshold - player.rect.y
         player.rect.y = threshold
@@ -129,11 +129,8 @@ while isRunning:
         for plat in platforms:
             if plat.rect.y > 800:
                 platformX.append(random.randint(100, 400))
-                plat.rect.y = random.randint(-50, 0)
-                if i > 0:
-                    while abs(platformX[i] - platformX[i-1]) <= 125 or abs(platformY[i] - platformY[i-1]) <= 125:
-                        platformX[i] = random.randint(Xmin, Xmax)
-                        platformY[i] = random.randint(-40, 0)
+                plat.rect.y = highestY -random.randint(minSpacing, maxSpacing)
+                highestY = plat.rect.y
   
     pygame.display.update()
     clock.tick(60)
