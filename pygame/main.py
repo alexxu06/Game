@@ -123,6 +123,7 @@ def run():
                     player.rect.bottom = plat.rect.top
                     jumpSpeed = 0
                     onPlat = True
+                    player.changeSprite("pygame/idle.png")
                     break
         if player.rect.y >= groundHeight:
             player.rect.y = groundHeight
