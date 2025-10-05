@@ -10,11 +10,10 @@ def run():
     PLAYER_HEIGHT = 100
     PLATFORM_WIDTH = 200
     PLATFORM_HEIGHT = 50
-    GROUND_HEIGHT = 700
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 800
     PLAYER_SPEED = 10
     GRAVITY = 0.6
-    THRESHOLD_UP = 300
-    THRESHOLD_DOWN = 500
 
     class gameObj:
         def __init__(self, x, y, width, height, imgPath, yOffset=0):
@@ -25,8 +24,8 @@ def run():
             self.rect = pygame.Rect(x, y - yOffset, width, height)
             self.yOffset = yOffset
 
-        def draw(self, surface):
-            surface.blit(self.image, (self.rect.x, self.rect.y))
+        def draw(self, surface, camera_y):
+            surface.blit(self.image, (self.rect.x, self.rect.y - camera_y))
 
         def changeSprite(self, imgPath, yOffset=None):
             self.image = pygame.image.load(imgPath)
@@ -35,10 +34,17 @@ def run():
                 self.rect.y -= (yOffset - self.yOffset)
                 self.yOffset = yOffset
 
-    # Initialize player
-    player = gameObj(400, 800, PLAYER_WIDTH, PLAYER_HEIGHT, "pygame/idle.png", yOffset=0)
+    # Load background (do NOT scale)
+    background = pygame.image.load("pygame/real_background.png")
+    BG_WIDTH, BG_HEIGHT = background.get_width(), background.get_height()
 
-    # Initialize platforms
+    # Camera offset (start at bottom)
+    camera_y = BG_HEIGHT - SCREEN_HEIGHT
+
+    # Initialize player at the bottom of the image
+    player = gameObj(400, BG_HEIGHT - PLAYER_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, "pygame/idle.png", yOffset=0)
+
+    # Initialize platforms near the bottom
     numPlatforms = 4
     platforms = []
     platformX = []
@@ -46,24 +52,19 @@ def run():
 
     for i in range(numPlatforms):
         platformX.append(random.randint(100, 400))
-        platformY.append(random.randint(100, 700))
+        platformY.append(random.randint(BG_HEIGHT - 700, BG_HEIGHT - 100))
         if i > 0:
             while abs(platformX[i] - platformX[i - 1]) <= 125 or abs(platformY[i] - platformY[i - 1]) <= 125:
                 platformX[i] = random.randint(200, 750)
-                platformY[i] = random.randint(100, 700)
+                platformY[i] = random.randint(BG_HEIGHT - 700, BG_HEIGHT - 100)
 
     for i in range(numPlatforms):
         plat = gameObj(platformX[i], platformY[i], PLATFORM_WIDTH, PLATFORM_HEIGHT, "pygame/platform.png")
         platforms.append(plat)
 
-    # Pygame setup
-    screen = pygame.display.set_mode((800, 800))
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Raccoon Jumper")
     clock = pygame.time.Clock()
-
-    # Load background
-    background = pygame.image.load("pygame/real_background.png")
-    background = pygame.transform.scale(background, (800, 800))
 
     isRunning = True
     isJumping = False
@@ -76,13 +77,13 @@ def run():
         sys.exit()
 
     while isRunning:
-        # Draw background first
-        screen.blit(background, (0, 0))
+        # Draw background with camera offset
+        screen.blit(background, (0, -camera_y))
 
-        # Draw player and platforms
-        player.draw(screen)
+        # Draw player and platforms with camera offset
+        player.draw(screen, camera_y)
         for plat in platforms:
-            plat.draw(screen)
+            plat.draw(screen, camera_y)
 
         # Events
         for event in pygame.event.get():
@@ -130,41 +131,31 @@ def run():
                     break
 
         # Check ground
-        if player.rect.y >= GROUND_HEIGHT:
-            player.rect.y = GROUND_HEIGHT
+        if player.rect.y >= BG_HEIGHT - PLAYER_HEIGHT:
+            player.rect.y = BG_HEIGHT - PLAYER_HEIGHT
             jumpSpeed = 0
             onPlat = True
             player.changeSprite("pygame/idle.png", yOffset=0)
 
         isJumping = not onPlat
 
-        # Screen scrolling
-        scrollAmount = 0
-        if not onPlat:
-            if player.rect.y < THRESHOLD_UP:
-                scrollAmount = THRESHOLD_UP - player.rect.y
-                player.rect.y = THRESHOLD_UP
-            elif player.rect.y > THRESHOLD_DOWN:
-                scrollAmount = THRESHOLD_DOWN - player.rect.y
-                player.rect.y = THRESHOLD_DOWN
+        # Update camera position based on player
+        camera_y = max(0, min(BG_HEIGHT - SCREEN_HEIGHT, player.rect.y - SCREEN_HEIGHT // 2))
 
-        for plat in platforms:
-            plat.rect.y += scrollAmount
-
-        # Recycle platforms
+        # Recycle platforms for infinite generation as you scroll up/down
         minSpacing, maxSpacing = 100, 200
         highestY = min(p.rect.y for p in platforms)
         lowestY = max(p.rect.y for p in platforms)
 
         for plat in platforms:
-            if plat.rect.y > 800:
-                plat.rect.x = random.randint(100, 400)
+            # If platform goes off the bottom of the visible screen, move it above the highest platform
+            if plat.rect.y - camera_y > SCREEN_HEIGHT:
+                plat.rect.x = random.randint(100, 600)
                 plat.rect.y = highestY - random.randint(minSpacing, maxSpacing)
-                highestY = plat.rect.y
-            elif plat.rect.y < -100:
-                plat.rect.x = random.randint(100, 400)
+            # If platform goes off the top of the visible screen, move it below the lowest platform
+            elif plat.rect.y - camera_y < -PLATFORM_HEIGHT:
+                plat.rect.x = random.randint(100, 600)
                 plat.rect.y = lowestY + random.randint(minSpacing, maxSpacing)
-                lowestY = plat.rect.y
 
         pygame.display.update()
         clock.tick(60)
