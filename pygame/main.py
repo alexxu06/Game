@@ -31,7 +31,7 @@ gravity = 0.6
 groundHeight = 700
 bgColor = (97, 86, 180)
 
-player = gameObj(400, 700, 100, 100, "pygame/guy.jpg")
+player = gameObj(400, 750, 100, 100, "pygame/idle.png")
 
 platforms = []
 platformX = []
@@ -86,10 +86,7 @@ while isRunning:
     
     for i in range(numPlatforms):
         platforms[i].draw(screen)
-        #if hasCollided(player, platforms, jumpSpeed):
-            #print("HIT")
-        
-        
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             endGame()
@@ -106,7 +103,6 @@ while isRunning:
         if player.rect.x < 700:
             player.rect.x+=playerSpeed
     
-  
     player.rect.y += jumpSpeed
     jumpSpeed += gravity
     
@@ -125,7 +121,6 @@ while isRunning:
     
     isJumping = not onPlat
   
-            
     pygame.display.update()
     clock.tick(60)
     
