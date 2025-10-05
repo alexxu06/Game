@@ -38,13 +38,9 @@ platformX = []
 platformY = []
 numPlatforms = 5
 
-Xmax = 400
-Xmin = 100
 
 for i in range(numPlatforms):
-    platformX.append(random.randint(Xmin, Xmax))
-    Xmax+=100
-    Xmin+=100
+    platformX.append(random.randint(100, 400))
     platformY.append(random.randint(100, 700))
     
     if i > 0:
@@ -122,25 +118,22 @@ while isRunning:
         onPlat = True
     
     isJumping = not onPlat
-    Xmax = 400
-    Xmin = 100
-    
+    min_spacing = 100
+    max_spacing = 200
     if player.rect.y < threshold:
         scrollAmount =  threshold - player.rect.y
         player.rect.y = threshold
         for plat in platforms:
             plat.rect.y += scrollAmount
-    
-        for i, plat in enumerate(platforms):
+        highestY = min(p.rect.y for p in platforms)
+        for plat in platforms:
             if plat.rect.y > 800:
-                platformX.append(random.randint(Xmin, Xmax))
-                Xmax+=100
-                Xmin+=100
+                platformX.append(random.randint(100, 400))
                 plat.rect.y = random.randint(-50, 0)
                 if i > 0:
                     while abs(platformX[i] - platformX[i-1]) <= 125 or abs(platformY[i] - platformY[i-1]) <= 125:
                         platformX[i] = random.randint(Xmin, Xmax)
-                        platformY[i] = random.randint(-50, 0)
+                        platformY[i] = random.randint(-40, 0)
   
     pygame.display.update()
     clock.tick(60)
