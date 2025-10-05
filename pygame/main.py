@@ -35,14 +35,14 @@ def run():
                 self.yOffset = yOffset
 
     # Load background (do NOT scale)
-    background = pygame.image.load("pygame/real_background.png")
+    background = pygame.image.load("assets/real_background.png")
     BG_WIDTH, BG_HEIGHT = background.get_width(), background.get_height()
 
     # Camera offset (start at bottom)
     camera_y = BG_HEIGHT - SCREEN_HEIGHT
 
     # Initialize player at the bottom of the image
-    player = gameObj(400, BG_HEIGHT - PLAYER_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, "pygame/idle.png", yOffset=0)
+    player = gameObj(400, BG_HEIGHT - PLAYER_HEIGHT, PLAYER_WIDTH, PLAYER_HEIGHT, "assets/idle.png", yOffset=0)
 
     # Initialize platforms near the bottom
     numPlatforms = 4
@@ -59,7 +59,7 @@ def run():
                 platformY[i] = random.randint(BG_HEIGHT - 700, BG_HEIGHT - 100)
 
     for i in range(numPlatforms):
-        plat = gameObj(platformX[i], platformY[i], PLATFORM_WIDTH, PLATFORM_HEIGHT, "pygame/platform.png")
+        plat = gameObj(platformX[i], platformY[i], PLATFORM_WIDTH, PLATFORM_HEIGHT, "assets/platform.png")
         platforms.append(plat)
 
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -93,27 +93,27 @@ def run():
                 if event.key == pygame.K_SPACE and not isJumping:
                     jumpSpeed = -20
                     isJumping = True
-                    player.changeSprite("pygame/jump.png", yOffset=0)
+                    player.changeSprite("assets/jump.png", yOffset=0)
 
         # Camera-based jump
         if delta_y.value > jump_threshold and not isJumping:
             jumpSpeed = -1 *  min(delta_y.value*0.7, 35)
             isJumping = True
-            player.changeSprite("pygame/jump.png", yOffset=0)
+            player.changeSprite("assets/jump.png", yOffset=0)
 
         # Camera-based left/right movement
         if delta_x.value > 8:
             if player.rect.x < 700:
                 player.rect.x += PLAYER_SPEED
                 if not isJumping:
-                    player.changeSprite("pygame/right.png", yOffset=0)
+                    player.changeSprite("assets/right.png", yOffset=0)
         elif delta_x.value < -8:
             if player.rect.x > 0:
                 player.rect.x -= PLAYER_SPEED
                 if not isJumping:
-                    player.changeSprite("pygame/left.png", yOffset=0)
+                    player.changeSprite("assets/left.png", yOffset=0)
         elif not isJumping:
-            player.changeSprite("pygame/idle.png", yOffset=0)
+            player.changeSprite("assets/idle.png", yOffset=0)
 
         # Apply gravity
         player.rect.y += jumpSpeed
@@ -127,7 +127,7 @@ def run():
                     player.rect.bottom = plat.rect.top
                     jumpSpeed = 0
                     onPlat = True
-                    player.changeSprite("pygame/idle.png", yOffset=0)
+                    player.changeSprite("assets/idle.png", yOffset=0)
                     break
 
         # Check ground
@@ -135,7 +135,7 @@ def run():
             player.rect.y = BG_HEIGHT - PLAYER_HEIGHT
             jumpSpeed = 0
             onPlat = True
-            player.changeSprite("pygame/idle.png", yOffset=0)
+            player.changeSprite("assets/idle.png", yOffset=0)
 
         isJumping = not onPlat
 
