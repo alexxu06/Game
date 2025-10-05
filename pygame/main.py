@@ -96,6 +96,7 @@ def run():
         #         player.rect.x+=playerSpeed
     # Camera-based left/right
         # Camera-based jump
+        player.changeSprite("pygame/idle.png")
         if delta_y.value > jump_threshold and not isJumping:
             isJumping = True
             jumpSpeed = -20
