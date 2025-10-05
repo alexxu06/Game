@@ -7,7 +7,7 @@
 ## Features
 
 * **Camera-based controls**: Move your character by shifting left or right in front of the camera.
-* **Jump physically**: Jump in real life to make your character jump in-game.
+* **Jump physically**: Jump in real life to make your character jump in-game. The higher the jump, the higher the raccoon goes!
 * **Dynamic platforms**: Endless recycling platforms keep the gameplay continuous.
 * **Multiple player sprites**: Different sprites for idle, moving left/right, and jumping.
 
