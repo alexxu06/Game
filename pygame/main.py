@@ -174,6 +174,6 @@ if __name__ == "__main__":
     # Start camera processes AFTER initializing pygame
     p1 = Process(target=camera_process, args=(delta_x, delta_y), daemon=True)
     p2 = Process(target=game_process, args=(delta_x, delta_y), daemon=True)
-    p1.start()aaa
+    p1.start()
     p2.start()
     run()
